@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Pipeline Explorer | Tokenization & 3D Embeddings</title>
+  
+  <!-- Modern Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Site Header -->
+    <header class="site-header">
+      <div class="header-badge">Educational NLP & LLM Architecture</div>
+      <h1 class="site-title">LLM PIPELINE EXPLORER</h1>
+      <p class="site-subtitle">Explore how language transforms into tokens and embeddings.</p>
+
+      <!-- Navigation Tabs -->
+      <nav class="main-nav" aria-label="Section Navigation">
+        <button class="nav-tab active" data-target="part-tokenizer">
+          <span class="nav-part-num">01</span>
+          <span>PART 01 — TOKENIZER</span>
+        </button>
+        <button class="nav-tab" data-target="part-embeddings">
+          <span class="nav-part-num">02</span>
+          <span>PART 02 — EMBEDDING IN 3D</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ============================================================== -->
+    <!-- PART 01 — TOKENIZER                                            -->
+    <!-- ============================================================== -->
+    <section id="part-tokenizer" class="main-section active">
+      
+      <div class="section-header-banner">
+        <div class="section-badge-title">
+          <span class="section-kicker">Core Concept 01</span>
+          <h2 class="section-heading">PART 01 — TOKENIZER</h2>
+        </div>
+        <p class="section-objective">
+          Learn how tokenizers build a vocabulary from training sentences, assign unique numerical IDs, and decompose unseen words into character subwords.
+        </p>
+      </div>
+
+      <div class="steps-container">
+
+        <!-- STEP 1: Enter Training Sentences -->
+        <div class="step-card">
+          <div class="step-indicator">
+            <span class="step-number">Step 1</span>
+            <h3 class="step-title">Enter Training Sentences</h3>
+          </div>
+          <p class="step-desc">
+            Provide the training corpus. The tokenizer parses every sentence, identifies unique tokens, and establishes the foundational vocabulary.
+          </p>
+
+          <div class="input-group">
+            <label for="train-sentences-input" class="input-label">Training Sentences (one per line):</label>
+            <textarea 
+              id="train-sentences-input" 
+              class="large-textarea" 
+              placeholder="Enter your training sentences here...&#10;Example:&#10;I love machine learning.&#10;Machine learning is interesting.&#10;I love programming."
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button id="btn-build-vocab" class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Build Vocabulary
+            </button>
+            <button id="btn-load-vocab-preset" class="btn-secondary">Load Example Sentences</button>
+            <button id="btn-clear-vocab-input" class="btn-ghost">Clear</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Display Vocabulary -->
+        <div class="step-card">
+          <div class="step-indicator">
+            <span class="step-number">Step 2</span>
+            <h3 class="step-title">Display Vocabulary</h3>
+          </div>
+          <p class="step-desc">
+            Every unique token in the training corpus receives one unique numerical ID starting from 0. Repeated tokens reuse their original ID.
+          </p>
+
+          <!-- Metrics Bar -->
+          <div id="vocab-stats-container" class="vocab-stats-bar" style="display: none;">
+            <div class="stat-chip">
+              <span>Training Sentences:</span>
+              <strong id="stat-sentences-count">0</strong>
+            </div>
+            <div class="stat-chip">
+              <span>Unique Vocabulary Tokens:</span>
+              <strong id="stat-vocab-count">0</strong>
+            </div>
+          </div>
+
+          <!-- Search Filter -->
+          <div class="vocab-filter-bar">
+            <input 
+              type="text" 
+              id="vocab-search-input" 
+              class="filter-input" 
+              placeholder="Search token or ID..." 
+              aria-label="Filter vocabulary table"
+            >
+          </div>
+
+          <!-- Vocabulary Table -->
+          <div id="vocab-table-wrapper" class="table-scroll-container">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th style="width: 60%;">Token</th>
+                  <th style="width: 40%;">Token ID</th>
+                </tr>
+              </thead>
+              <tbody id="vocab-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="vocab-empty-state" class="empty-state-card" style="display: none;">
+            <p>Vocabulary has not been built yet. Click <strong>Build Vocabulary</strong> in Step 1.</p>
+          </div>
+        </div>
+
+        <!-- STEP 3: Encode a Sentence -->
+        <div class="step-card">
+          <div class="step-indicator">
+            <span class="step-number">Step 3</span>
+            <h3 class="step-title">Encode a Sentence</h3>
+          </div>
+          <p class="step-desc">
+            Enter any sentence to encode. Known words receive vocabulary IDs. Unknown words are decomposed into character tokens with continuation prefixes (<code>##</code>).
+          </p>
+
+          <div class="input-group">
+            <label for="encode-sentence-input" class="input-label">Enter a sentence to tokenize and encode:</label>
+            <input 
+              type="text" 
+              id="encode-sentence-input" 
+              class="text-input" 
+              placeholder="e.g. I love cat"
+            >
+          </div>
+
+          <!-- Quick presets -->
+          <div class="presets-bar">
+            <span class="preset-title">Try test sentences:</span>
+            <button class="encode-preset-chip" data-sentence="I love cat">"I love cat" (Unknown word)</button>
+            <button class="encode-preset-chip" data-sentence="I love machine learning.">"I love machine learning." (Known words)</button>
+            <button class="encode-preset-chip" data-sentence="Machine programming cat dog">"Machine programming cat dog"</button>
+          </div>
+
+          <div class="btn-row" style="margin-top: 18px;">
+            <button id="btn-encode-sentence" class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Encode Sentence
+            </button>
+          </div>
+
+          <!-- Results Display -->
+          <div id="encode-empty-state" class="empty-state-card" style="margin-top: 24px; display: none;">
+            <p>Enter a sentence and click <strong>Encode Sentence</strong> to see the tokenization breakdown.</p>
+          </div>
+
+          <div id="encode-results-wrapper" class="encode-results-wrapper">
+            
+            <!-- 1. Original Sentence -->
+            <div class="result-card">
+              <div class="result-card-title">1. Original Sentence</div>
+              <div id="display-original-sentence" class="original-sentence-box">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- 2. Tokenized Output (Visual Boxes) -->
+            <div class="result-card">
+              <div class="result-card-title">2. Tokenized Output (Word & Subword Tokens)</div>
+              <div id="token-boxes-container" class="token-boxes-container">
+                <!-- Token chips rendered here -->
+              </div>
+            </div>
+
+            <!-- Unknown Token Decomposition Alert -->
+            <div id="subword-alert-box" class="subword-alert" style="display: none;">
+              <span class="alert-icon">ℹ️</span>
+              <div id="subword-alert-text"></div>
+            </div>
+
+            <!-- 3. Token ID Mapping Table -->
+            <div class="result-card">
+              <div class="result-card-title">3. Token ID Mapping Table</div>
+              <div class="table-scroll-container" style="max-height: 240px;">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 35%;">Token</th>
+                      <th style="width: 25%;">Token ID</th>
+                      <th style="width: 40%;">Token Classification</th>
+                    </tr>
+                  </thead>
+                  <tbody id="token-mapping-table-body">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Final Encoded Sequence -->
+            <div class="encoded-sequence-card">
+              <div>
+                <div class="sequence-label">Final Numerical Encoded Sequence (LLM Input Vector)</div>
+                <div id="encoded-sequence-display" class="sequence-code">[ ... ]</div>
+              </div>
+              <button id="btn-copy-sequence" class="btn-copy" title="Copy array to clipboard">Copy Sequence</button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- PART 02 — EMBEDDING IN 3D                                      -->
+    <!-- ============================================================== -->
+    <section id="part-embeddings" class="main-section">
+      
+      <div class="section-header-banner">
+        <div class="section-badge-title">
+          <span class="section-kicker">Core Concept 02</span>
+          <h2 class="section-heading">PART 02 — EMBEDDING IN 3D</h2>
+        </div>
+        <p class="section-objective">
+          Visualize how sentences transform into dense vectors. Explore the difference between surface spelling proximity and deep semantic meaning in an interactive 3D vector space.
+        </p>
+      </div>
+
+      <div class="steps-container">
+
+        <!-- STEP 1: Enter Sentences -->
+        <div class="step-card">
+          <div class="step-indicator">
+            <span class="step-number">Step 1</span>
+            <h3 class="step-title">Enter Sentences</h3>
+          </div>
+          <p class="step-desc">
+            Enter the sentences you wish to embed. Each sentence will be projected as a unique point in the 3D room.
+          </p>
+
+          <div class="input-group">
+            <label for="embed-sentences-input" class="input-label">Enter sentences (one sentence per line):</label>
+            <textarea 
+              id="embed-sentences-input" 
+              class="large-textarea" 
+              placeholder="I love machine learning.&#10;I enjoy studying AI.&#10;The weather is beautiful today.&#10;I like programming.&#10;Deep learning is fascinating."
+              rows="6"
+            ></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button id="preset-ai-weather" class="btn-secondary">AI vs Weather Dataset</button>
+            <button id="preset-semantic-test" class="btn-secondary">Dogs vs Puppies vs Stocks (Semantic Test)</button>
+            <button id="btn-clear-embed-input" class="btn-ghost">Clear</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Select Embedding Type -->
+        <div class="step-card">
+          <div class="step-indicator">
+            <span class="step-number">Step 2</span>
+            <h3 class="step-title">Select Embedding Type</h3>
+          </div>
+          <p class="step-desc">
+            Choose how sentence coordinates are determined before dimensionality reduction:
+          </p>
+
+          <div class="embedding-type-grid">
+            
+            <!-- OPTION A: SPELLING EMBEDDING -->
+            <div id="card-embed-spelling" class="embed-option-card selected" role="button" tabindex="0">
+              <div class="card-top">
+                <span class="option-badge">Option A</span>
+                <span class="check-indicator">✓</span>
+              </div>
+              <h4 class="option-name">Spelling Embedding</h4>
+              <p class="option-desc">
+                Sentences that contain similar words or have similar spelling patterns will be positioned closer together.
+              </p>
+              <div class="option-example">
+                <strong>Character N-Grams:</strong> "machine" and "machinery" will land close together; "dogs" and "puppies" land far apart.
+              </div>
+            </div>
+
+            <!-- OPTION B: MEANING EMBEDDING -->
+            <div id="card-embed-meaning" class="embed-option-card" role="button" tabindex="0">
+              <div class="card-top">
+                <span class="option-badge">Option B</span>
+                <span class="check-indicator">✓</span>
+              </div>
+              <h4 class="option-name">Meaning Embedding (Semantic)</h4>
+              <p class="option-desc">
+                Sentences with similar meanings or semantic concepts will be positioned closer together, even if they use different words.
+              </p>
+              <div class="option-example">
+                <strong>Semantic Space:</strong> "I love dogs." and "I adore puppies." land close together; "The stock market is falling." lands far apart.
+              </div>
+            </div>
+
+          </div>
+
+          <div class="btn-row">
+            <button id="btn-generate-embeddings" class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              Generate 3D Embeddings
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: 3D Visualization Room -->
+        <div class="step-card">
+          <div class="step-indicator">
+            <span class="step-number">Step 3</span>
+            <h3 class="step-title">Interactive 3D Room</h3>
+          </div>
+          <p class="step-desc">
+            Explore the high-dimensional embeddings projected into 3D space via Principal Component Analysis (PCA). Rotate, zoom, and click points to inspect sentence locations.
+          </p>
+
+          <!-- 3D Canvas Box -->
+          <div class="visualizer-wrapper">
+            
+            <div class="visualizer-toolbar">
+              <div class="toolbar-left">
+                <span id="badge-current-embedding" class="mode-badge">Option A: Spelling Embedding</span>
+                <span class="count-badge">Sentences Plotted: <strong id="stat-plotted-count">0</strong></span>
+              </div>
+              <div class="toolbar-right">
+                <button id="btn-toggle-auto-rotate" class="btn-ctrl">Auto-Rotate</button>
+                <button id="btn-reset-camera" class="btn-ctrl">Reset Camera View</button>
+              </div>
+            </div>
+
+            <!-- Canvas Stage -->
+            <div id="visualizer-3d-container" class="visualizer-stage" aria-label="3D room visualization">
+              <!-- Three.js Canvas / Fallback Canvas injected here -->
+            </div>
+
+            <!-- Legend & Instructions -->
+            <div class="visualizer-footer">
+              <div class="legend-group">
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Sentence Point</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot selected-dot"></span>
+                  <span>Selected Point</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-axis">X, Y, Z:</span>
+                  <span>Royal Blue Coordinate Axes</span>
+                </div>
+              </div>
+              <div class="hint-controls">
+                <span>Drag: Rotate</span> • <span>Scroll: Zoom</span> • <span>Right-Click: Pan</span> • <span>Click: Select</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Selected Point Details -->
+          <div id="selected-point-details" class="selected-point-details">
+            <div class="empty-selection-hint">
+              <p>Click on any point in the 3D room to inspect its coordinates and sentence.</p>
+              <p class="sub-hint">Tip: Click two points to compare their 3D distance and similarity!</p>
+            </div>
+          </div>
+
+          <!-- Pairwise Comparison Card (Shown when 2 points selected) -->
+          <div id="pairwise-comparison-card" class="pairwise-card" style="display: none;">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Sentences Directory Table -->
+          <div class="result-card">
+            <div class="result-card-title">Sentences Represented in 3D Space</div>
+            <div class="table-scroll-container">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th style="width: 10%;">Point</th>
+                    <th style="width: 45%;">Sentence</th>
+                    <th style="width: 30%;">3D Coordinates (X, Y, Z)</th>
+                    <th style="width: 15%;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="embed-sentences-table-body">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Educational Summary Box -->
+      <div class="edu-summary-card">
+        <h4 class="edu-title">
+          <span>📚</span> Educational Takeaway: Spelling vs. Semantic Embeddings
+        </h4>
+        <div class="edu-grid">
+          <div class="edu-box">
+            <h5>Why Spelling Models Fail at Semantics</h5>
+            <p>
+              Character and n-gram models only look at surface character overlap. They treat <em>"I love dogs"</em> and <em>"I adore puppies"</em> as completely distinct because they share almost no common letters, despite meaning the exact same thing to a human.
+            </p>
+          </div>
+          <div class="edu-box">
+            <h5>How Modern LLMs Understand Meaning</h5>
+            <p>
+              Modern Transformer models (like BERT, GPT, and Gemini) map words into dense, high-dimensional vector spaces where synonyms, related concepts, and syntactic roles cluster together. Dimensionality reduction (like PCA or t-SNE) projects these into 3D for human exploration.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <p class="footer-credits">
+        <strong>LLM Pipeline Explorer</strong> • Interactive Educational NLP Learning Tool
+      </p>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="app-toast" class="app-toast" role="status" aria-live="polite"></div>
+
+  </div>
+
+  <!-- Three.js and OrbitControls from CDN (with built-in offline 2D/3D fallback) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Application Modules -->
+  <script src="js/tokenizer.js"></script>
+  <script src="js/embeddings.js"></script>
+  <script src="js/visualizer3d.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
